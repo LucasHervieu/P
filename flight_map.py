@@ -75,5 +75,5 @@ class FlightMap:
             print(f"Error: Aucune destination trouvée pour les vols au départ de {airport_code}")
         else:
             print(f"Success: {len(airports)} destinations trouvées pour les vols au départ de {airport_code}")
-        return airports
+        return airports 
 
