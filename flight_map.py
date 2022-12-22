@@ -1,6 +1,9 @@
 import csv
 from airport import Airport
 from flight import Flight 
+from flight_path import FlightPath
+from collections import deque
+
 
 class FlightMap:
     def __init__(self):
@@ -76,4 +79,46 @@ class FlightMap:
         else:
             print(f"Success: {len(airports)} destinations trouvées pour les vols au départ de {airport_code}")
         return airports 
+    
+    def paths(self, src_airport_code: str, dst_airport_code: str) -> list[FlightPath]:
+        # Initialisation de la liste des aéroports non visités et des aéroports futurs
+        airports_not_visited = self.__airports[:]
+        airports_future = deque()
+
+        # Initialisation de la liste des aéroports visités et du premier aéroport à visiter
+        airports_visited = []
+        airports_future.append(src_airport_code)
+
+        # Initialisation de la liste des plans de vols trouvés
+        paths = []
+
+        # Tant qu'il y a encore des aéroports à visiter
+        while airports_future:
+            # Récupération du prochain aéroport à visiter
+            airport_code = airports_future.popleft()
+
+            # Si l'aéroport est déjà visité, on passe au suivant
+            if airport_code in airports_visited:
+                continue
+
+            # Ajout de l'aéroport aux aéroports visités
+            airports_visited.append(airport_code)
+
+            # Si l'aéroport est l'aéroport de destination, on ajoute un plan de vol à la liste
+            if airport_code == dst_airport_code:
+                paths.append(FlightPath([], 0))
+                continue
+
+            # Recherche des aéroports accessibles depuis l'aéroport actuel
+            for flight in self.__flights:
+                if flight.src_code == airport_code:
+                    # Ajout de l'aéroport destination à la liste des aéroports futurs
+                    airports_future.append(flight.dst_code)
+
+                    # Création d'un nouveau plan de vol en ajoutant le vol actuel au plan de vol précédemment trouvé
+                    new_path = FlightPath(paths[-1].path + [flight], paths[-1].distance + 1)
+                    paths.append(new_path)
+
+        # Retour de la liste des plans de vols trouvés
+        return paths
 
